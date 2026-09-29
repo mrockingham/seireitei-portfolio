@@ -1,0 +1,587 @@
+{
+  "version": 2,
+  "units": "meters",
+  "upAxis": "Y",
+  "coordinateConversion": "Blender (x,y,z) -> glTF (x,z,-y)",
+  "visual": "seireitei-world.glb",
+  "collision": "seireitei-collision.glb",
+  "source": "world/v04/spirit_city_v04.blend",
+  "sourceSha256": "8106582c2315ca5e7c43e018c3668f51e66bc243116622dc6289c6e6d482abbf",
+  "spawn": [
+    0,
+    0.05,
+    22
+  ],
+  "encounters": [
+    {
+      "id": 1,
+      "name": "Gate courtyard",
+      "position": [
+        0.0,
+        0.18,
+        5.0
+      ],
+      "radius": 3,
+      "playerSpawn": [
+        0.0,
+        0.18,
+        7.0
+      ],
+      "opponentSpawn": [
+        0.0,
+        0.18,
+        3.0
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Division barracks",
+      "position": [
+        28.0,
+        0.61,
+        -11.0
+      ],
+      "radius": 3,
+      "playerSpawn": [
+        28.0,
+        0.61,
+        -9.0
+      ],
+      "opponentSpawn": [
+        28.0,
+        0.61,
+        -13.0
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Kuchiki garden",
+      "position": [
+        -22.0,
+        0.23,
+        -32.0
+      ],
+      "radius": 5,
+      "playerSpawn": [
+        -22.0,
+        0.23,
+        -29.0
+      ],
+      "opponentSpawn": [
+        -22.0,
+        0.23,
+        -35.0
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Sokyoku hill summit",
+      "position": [
+        -14.0,
+        22.040001,
+        -87.0
+      ],
+      "radius": 3,
+      "playerSpawn": [
+        -14.0,
+        22.040001,
+        -85.0
+      ],
+      "opponentSpawn": [
+        -14.0,
+        22.040001,
+        -89.0
+      ]
+    }
+  ],
+  "route": [
+    {
+      "name": "ROUTE_00",
+      "position": [
+        0.0,
+        0.0,
+        22.0
+      ]
+    },
+    {
+      "name": "ROUTE_01",
+      "position": [
+        0.0,
+        0.0,
+        5.0
+      ]
+    },
+    {
+      "name": "ROUTE_02",
+      "position": [
+        28.0,
+        0.0,
+        5.0
+      ]
+    },
+    {
+      "name": "ROUTE_03",
+      "position": [
+        28.0,
+        0.6,
+        -11.0
+      ]
+    },
+    {
+      "name": "ROUTE_04",
+      "position": [
+        28.0,
+        0.0,
+        -25.0
+      ]
+    },
+    {
+      "name": "ROUTE_05",
+      "position": [
+        28.0,
+        0.0,
+        -32.0
+      ]
+    },
+    {
+      "name": "ROUTE_06",
+      "position": [
+        -3.0,
+        0.0,
+        -32.0
+      ]
+    },
+    {
+      "name": "ROUTE_07",
+      "position": [
+        -3.0,
+        0.0,
+        -19.0
+      ]
+    },
+    {
+      "name": "ROUTE_08",
+      "position": [
+        -22.0,
+        0.2,
+        -19.0
+      ]
+    },
+    {
+      "name": "ROUTE_09",
+      "position": [
+        -22.0,
+        0.75,
+        -24.0
+      ]
+    },
+    {
+      "name": "ROUTE_10",
+      "position": [
+        -22.0,
+        0.23,
+        -28.0
+      ]
+    },
+    {
+      "name": "ROUTE_11",
+      "position": [
+        -22.0,
+        0.23,
+        -32.0
+      ]
+    },
+    {
+      "name": "ROUTE_12",
+      "position": [
+        -22.0,
+        0.61,
+        -39.0
+      ]
+    },
+    {
+      "name": "ROUTE_13",
+      "position": [
+        -22.0,
+        0.6,
+        -51.0
+      ]
+    },
+    {
+      "name": "ROUTE_14",
+      "position": [
+        -22.0,
+        0.61,
+        -61.0
+      ]
+    },
+    {
+      "name": "ROUTE_15",
+      "position": [
+        -22.0,
+        0.0,
+        -63.5
+      ]
+    },
+    {
+      "name": "ROUTE_16",
+      "position": [
+        -22.0,
+        0.0,
+        -65.0
+      ]
+    },
+    {
+      "name": "ROUTE_17",
+      "position": [
+        4.0,
+        11.0,
+        -65.0
+      ]
+    },
+    {
+      "name": "ROUTE_18",
+      "position": [
+        4.0,
+        11.0,
+        -69.0
+      ]
+    },
+    {
+      "name": "ROUTE_19",
+      "position": [
+        -22.0,
+        22.0,
+        -69.0
+      ]
+    },
+    {
+      "name": "ROUTE_20",
+      "position": [
+        -22.0,
+        22.0,
+        -77.0
+      ]
+    },
+    {
+      "name": "ROUTE_21",
+      "position": [
+        -14.0,
+        22.0,
+        -87.0
+      ]
+    }
+  ],
+  "doors": [
+    {
+      "node": "DOOR_00",
+      "sourceName": "Door_L",
+      "clip": "gate_open",
+      "closed": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "open": [
+        -5.55,
+        0.0,
+        0.0
+      ],
+      "duration": 2,
+      "colliderNode": "COLLIDER_DOOR_00",
+      "colliderLocalCenter": [
+        -2.7,
+        5.5,
+        15.065001
+      ],
+      "colliderSize": [
+        5.38,
+        10.5,
+        0.37
+      ]
+    },
+    {
+      "node": "DOOR_01",
+      "sourceName": "Door_R",
+      "clip": "gate_open",
+      "closed": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "open": [
+        5.55,
+        0.0,
+        0.0
+      ],
+      "duration": 2,
+      "colliderNode": "COLLIDER_DOOR_01",
+      "colliderLocalCenter": [
+        2.7,
+        5.5,
+        15.065001
+      ],
+      "colliderSize": [
+        5.38,
+        10.5,
+        0.37
+      ]
+    },
+    {
+      "node": "DOOR_02",
+      "sourceName": "02 | Division barracks front door -1",
+      "clip": "barracks_front_open",
+      "closed": [
+        27.0,
+        2.5,
+        0.0
+      ],
+      "open": [
+        24.799999,
+        2.5,
+        0.0
+      ],
+      "duration": 2,
+      "colliderNode": "COLLIDER_DOOR_02",
+      "colliderLocalCenter": [
+        0.0,
+        0.0,
+        0.01875
+      ],
+      "colliderSize": [
+        1.959999,
+        3.8,
+        0.2075
+      ]
+    },
+    {
+      "node": "DOOR_03",
+      "sourceName": "02 | Division barracks front door 1",
+      "clip": "barracks_front_open",
+      "closed": [
+        29.0,
+        2.5,
+        0.0
+      ],
+      "open": [
+        31.200001,
+        2.5,
+        0.0
+      ],
+      "duration": 2,
+      "colliderNode": "COLLIDER_DOOR_03",
+      "colliderLocalCenter": [
+        0.0,
+        0.0,
+        0.01875
+      ],
+      "colliderSize": [
+        1.959999,
+        3.8,
+        0.2075
+      ]
+    },
+    {
+      "node": "DOOR_04",
+      "sourceName": "02 | Division barracks rear door -1",
+      "clip": "barracks_rear_open",
+      "closed": [
+        27.0,
+        2.5,
+        -22.0
+      ],
+      "open": [
+        24.799999,
+        2.5,
+        -22.0
+      ],
+      "duration": 2,
+      "colliderNode": "COLLIDER_DOOR_04",
+      "colliderLocalCenter": [
+        0.0,
+        0.0,
+        0.01875
+      ],
+      "colliderSize": [
+        1.959999,
+        3.8,
+        0.207499
+      ]
+    },
+    {
+      "node": "DOOR_05",
+      "sourceName": "02 | Division barracks rear door 1",
+      "clip": "barracks_rear_open",
+      "closed": [
+        29.0,
+        2.5,
+        -22.0
+      ],
+      "open": [
+        31.200001,
+        2.5,
+        -22.0
+      ],
+      "duration": 2,
+      "colliderNode": "COLLIDER_DOOR_05",
+      "colliderLocalCenter": [
+        0.0,
+        0.0,
+        0.01875
+      ],
+      "colliderSize": [
+        1.959999,
+        3.8,
+        0.207499
+      ]
+    },
+    {
+      "node": "DOOR_06",
+      "sourceName": "03 | Kuchiki receiving hall front door -1",
+      "clip": "compound_front_open",
+      "closed": [
+        -23.0,
+        2.5,
+        -42.0
+      ],
+      "open": [
+        -25.200001,
+        2.5,
+        -42.0
+      ],
+      "duration": 2,
+      "colliderNode": "COLLIDER_DOOR_06",
+      "colliderLocalCenter": [
+        0.0,
+        0.0,
+        0.018751
+      ],
+      "colliderSize": [
+        1.959999,
+        3.8,
+        0.2075
+      ]
+    },
+    {
+      "node": "DOOR_07",
+      "sourceName": "03 | Kuchiki receiving hall front door 1",
+      "clip": "compound_front_open",
+      "closed": [
+        -21.0,
+        2.5,
+        -42.0
+      ],
+      "open": [
+        -18.799999,
+        2.5,
+        -42.0
+      ],
+      "duration": 2,
+      "colliderNode": "COLLIDER_DOOR_07",
+      "colliderLocalCenter": [
+        0.0,
+        0.0,
+        0.018751
+      ],
+      "colliderSize": [
+        1.959999,
+        3.8,
+        0.2075
+      ]
+    },
+    {
+      "node": "DOOR_08",
+      "sourceName": "03 | Kuchiki receiving hall rear door -1",
+      "clip": "compound_rear_open",
+      "closed": [
+        -23.0,
+        2.5,
+        -60.0
+      ],
+      "open": [
+        -25.200001,
+        2.5,
+        -60.0
+      ],
+      "duration": 2,
+      "colliderNode": "COLLIDER_DOOR_08",
+      "colliderLocalCenter": [
+        0.0,
+        0.0,
+        0.018751
+      ],
+      "colliderSize": [
+        1.959999,
+        3.8,
+        0.2075
+      ]
+    },
+    {
+      "node": "DOOR_09",
+      "sourceName": "03 | Kuchiki receiving hall rear door 1",
+      "clip": "compound_rear_open",
+      "closed": [
+        -21.0,
+        2.5,
+        -60.0
+      ],
+      "open": [
+        -18.799999,
+        2.5,
+        -60.0
+      ],
+      "duration": 2,
+      "colliderNode": "COLLIDER_DOOR_09",
+      "colliderLocalCenter": [
+        0.0,
+        0.0,
+        0.018751
+      ],
+      "colliderSize": [
+        1.959999,
+        3.8,
+        0.2075
+      ]
+    }
+  ],
+  "lighting": {
+    "note": "Cycles lighting is not baked. Configure browser lighting; interior fill is needed.",
+    "background": "#91b4d0",
+    "ambientIntensity": 1.2,
+    "sunPosition": [
+      30,
+      60,
+      35
+    ]
+  },
+  "controllerRecommendations": {
+    "capsuleRadius": 0.3,
+    "capsuleHeight": 1.8,
+    "stepHeight": 0.3,
+    "maxSlopeDegrees": 35
+  },
+  "stats": {
+    "visual": {
+      "file": "seireitei-world.glb",
+      "bytes": 7505408,
+      "triangles": 122800,
+      "meshNodes": 22,
+      "primitives": 111,
+      "materials": 28
+    },
+    "collision": {
+      "file": "seireitei-collision.glb",
+      "bytes": 369712,
+      "triangles": 5886,
+      "meshNodes": 12,
+      "primitives": 12,
+      "materials": 1
+    }
+  },
+  "limitations": [
+    "No player controller, physics runtime or navmesh is included.",
+    "Collision proxies require integration with a physics engine.",
+    "Tower is exterior scenery; its bridge ends at a blocked tower shoulder.",
+    "No baked lighting; browser appearance will differ from Cycles renders."
+  ]
+}
