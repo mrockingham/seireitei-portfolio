@@ -9,6 +9,7 @@ import type { Place } from './world-data'
 import type { Controls, Travel, Vec3 } from './World'
 import type { Arrival } from './ArrivalFx'
 import { loadingStore } from './world-assets'
+import QuickView from './QuickView'
 import './App.css'
 import { isEncounterActive, advanceEncounter, barracksSteps, finaleSteps, gardenSteps, gateSteps } from './encounter-state'
 import type { EncounterPhase } from './encounter-state'
@@ -151,6 +152,15 @@ export default function App() {
   const [ready, setReady] = useState(false)
   const [entered, setEntered] = useState(false)
   const [panel, setPanel] = useState<'map' | 'controls' | 'encounter' | null>(null)
+  /** Portfolio at a glance: one page with everything, shareable as #portfolio. */
+  const [quick, setQuick] = useState(() => window.location.hash === '#portfolio')
+  const openQuick = useCallback(() => { setQuick(true); history.replaceState(null, '', '#portfolio') }, [])
+  const closeQuick = useCallback(() => { setQuick(false); if (window.location.hash === '#portfolio') history.replaceState(null, '', window.location.pathname + window.location.search) }, [])
+  useEffect(() => {
+    const sync = () => setQuick(window.location.hash === '#portfolio')
+    window.addEventListener('hashchange', sync)
+    return () => window.removeEventListener('hashchange', sync)
+  }, [])
   /** The website being browsed on the lab's screen wall, or null. */
   const [gallery, setGallery] = useState<number | null>(null)
   const [error, setError] = useState('')
@@ -207,7 +217,7 @@ export default function App() {
     setCameraMode(next)
     ;(document.activeElement as HTMLElement)?.blur()
   }, [])
-  const playing = entered && !panel && !error && !encounterActive && gallery === null && !transit
+  const playing = entered && !panel && !error && !encounterActive && gallery === null && !transit && !quick
   const onSelectSite = useCallback((i: number) => { controls.current.keys.clear(); setPanel(null); setGallery(i); setJourneyNote(false) }, [])
   const readyCallback = useCallback(() => setReady(true), [])
   const nearest = places.map((p, index) => { const distance = Math.hypot(p.position[0] - position[0], p.position[2] - position[2], p.position[1] - position[1]); return { index, distance, score: distance - p.radius } }).sort((a, b) => a.score - b.score)[0]
@@ -253,6 +263,7 @@ export default function App() {
     const keys = controls.current.keys
     function down(e: KeyboardEvent) {
       if (transit) return
+      if (quick) { if (e.code === 'Escape') { e.preventDefault(); closeQuick() } return }
       if (encounterActive) {
         // Cinematics: Escape skips to the portfolio section (or ends the finishing move);
         // the right arrow steps one beat.
@@ -282,7 +293,7 @@ export default function App() {
     window.addEventListener('keydown', down); window.addEventListener('keyup', up); window.addEventListener('blur', blur)
     document.addEventListener('visibilitychange', blur)
     return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.removeEventListener('blur', blur); document.removeEventListener('visibilitychange', blur); keys.clear() }
-  }, [playing, nearby, atTraining, atLab, gallery, onSelectSite, entered, toggleCamera, encounterActive, phase, stage, completeCinematic, transit])
+  }, [playing, nearby, atTraining, atLab, gallery, onSelectSite, entered, toggleCamera, encounterActive, phase, stage, completeCinematic, transit, quick, closeQuick])
   function teleport(p: Vec3, yaw = 0) {
     controls.current.keys.clear(); controls.current.yaw = yaw; setGallery(null)
     setTravel(old => ({ serial: old.serial + 1, position: p })); setPanel(null)
@@ -341,12 +352,13 @@ export default function App() {
     </div>
     <header inert={encounterActive}>
       <a className="brand" href="#" onClick={e => { e.preventDefault(); if (entered) setPanel('map') }} aria-label="Seireitei world map"><span className="brand-symbol">✦</span><span>SEIREITEI<small>MICHAEL ROCKINGHAM · PORTFOLIO</small></span></a>
-      <div className="top-actions"><span className="edition">WORLD STUDY / 01</span>{entered && <><button onClick={toggleCamera} aria-label={`Camera: ${cameraMode === 'free' ? 'free look' : 'third-person follow'}. Switch mode`} aria-pressed={cameraMode === 'follow'}>{cameraMode === 'free' ? 'Free look' : 'Follow camera'} <kbd>C</kbd></button><button onClick={() => setPanel('map')}>Map <kbd>M</kbd></button><button onClick={() => setPanel('controls')}>Controls <span>↗</span></button></>}</div>
+      <div className="top-actions"><span className="edition">WORLD STUDY / 01</span>{!encounterActive && !transit && <button className="quick-open" onClick={openQuick} aria-label="Portfolio at a glance">Portfolio <span>≡</span></button>}{entered && <><button onClick={toggleCamera} aria-label={`Camera: ${cameraMode === 'free' ? 'free look' : 'third-person follow'}. Switch mode`} aria-pressed={cameraMode === 'follow'}>{cameraMode === 'free' ? 'Free look' : 'Follow camera'} <kbd>C</kbd></button><button onClick={() => setPanel('map')}>Map <kbd>M</kbd></button><button onClick={() => setPanel('controls')}>Controls <span>↗</span></button></>}</div>
     </header>
     {!entered && <section className="entry">
       <div className="entry-copy"><p className="eyebrow"><span /> THE SOUL SOCIETY</p><h1>Every journey<br />begins at<br /><em>the gate.</em></h1><p className="intro">Step into Seireitei. Follow the streets, enter the halls, and find your way to the hill above it all.</p>
         {!error && <LoadingStatus ready={ready} />}
         <button className={ready ? 'primary ready' : 'primary'} disabled={!ready || !!error} onClick={e => { setEntered(true); e.currentTarget.blur() }}>{ready ? 'Enter the world' : 'Loading…'}<span>→</span></button>
+        <button className="quick-link" onClick={openQuick}>Short on time? See the portfolio at a glance <span>→</span></button>
         <div className="entry-notes"><span>0{places.length} LOCATIONS</span><span>FREE EXPLORATION</span></div>
       </div>
       <div className="entry-bottom"><span>A BLEACH-INSPIRED WORLD</span><span>Headphones optional. Curiosity encouraged.</span></div>
@@ -428,6 +440,7 @@ export default function App() {
     {entered && phase === 'complete' && !panel && nearest.distance < 7 && nearest.index === stage && <div className="encounter-next" role="status"><strong>{stage === 0 ? 'Gate encounter complete' : stage === 1 ? 'Barracks encounter complete' : stage === 2 ? 'Garden encounter complete' : 'Final encounter complete'}</strong><span>{stage === 0 ? 'Turn right and follow the street to the Division barracks →' : stage === 1 ? 'Continue through the rear doors toward the Kuchiki compound →' : stage === 2 ? 'Continue through the estate toward Sōkyoku Hill →' : 'All four chapters are ready to explore again.'}</span><button onClick={() => startEncounter(stage)}>Replay encounter</button></div>}
     {entered && gallery !== null && <GalleryPanel index={gallery} onPrev={() => setGallery((gallery - 1 + siteSlots.length) % siteSlots.length)} onNext={() => setGallery((gallery + 1) % siteSlots.length)} onClose={() => setGallery(null)} />}
     {entered && journeyNote && atLab && !transit && gallery === null && !panel && <div className="encounter-next journey-note" role="status"><strong>Journey complete</strong><span>The Senkaimon brought you to the Twelfth Division lab. Step inside to browse the websites.</span><button onClick={() => onSelectSite(0)}>Browse the websites</button></div>}
+    {quick && <QuickView entered={entered} ready={ready} onClose={closeQuick} onEnter={() => { closeQuick(); setEntered(true) }} />}
     {transit && <div className="senkaimon" aria-hidden="true">
       <div className="senkaimon-light" />
       <div className="senkaimon-door left"><span>穿</span></div>

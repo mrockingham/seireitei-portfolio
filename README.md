@@ -11,6 +11,10 @@ npm run dev
 
 Open the local Vite URL. Click **Enter the world**. WASD/arrows move, Shift runs, click-drag rotates the following camera, and scroll changes distance. M opens the world map; E inspects a nearby location; Escape opens/closes controls. The map supports quick travel while testing. On touch screens (phones and tablets, in either orientation) a joystick appears: put your thumb down anywhere in the lower-left of the screen and it centres there; a light push walks, pushing to the rim runs. One finger dragging elsewhere turns the camera, and two fingers pinch to zoom. The location card moves to the top-left out of your thumb’s way, and the Controls panel lists the touch controls. Fights, the website gallery, and the panels all use on-screen buttons, so they need no keyboard.
 
+## Portfolio at a glance
+
+For visitors who would rather not walk the world, one plain page holds everything: About, Experience (every role and highlight), Skills, the Websites (screenshots, descriptions, tags, Visit and Code links), how this site was built, and the contact links. It opens from *Short on time? See the portfolio at a glance* on the landing screen, from the **Portfolio** button in the header (on the landing screen and anywhere in the world, except during a fight), or from a shared link to `/#portfolio`. Tabs jump between sections; **Esc**, ×, or *Back to the world* closes it (the world pauses while it is open). On phones it fills the screen. Code: `src/QuickView.tsx`, reading the same `src/portfolio-content.ts` as the rest of the site.
+
 ## Implemented
 
 - Loads the actual optimized GLB, without regenerating the environment.
