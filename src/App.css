@@ -142,3 +142,18 @@ header[inert]{opacity:0;transition:opacity .5s}
 .touch-stick{position:absolute;left:92px;top:calc(100% - 96px);width:112px;height:112px;margin:-56px 0 0 -56px;border-radius:50%;border:1.5px solid #ffffff55;background:radial-gradient(circle,#15282d55 0,#15282d99 70%);box-shadow:0 0 0 6px #4fc3ff14;opacity:.55;transition:opacity .15s;pointer-events:none}
 .touch-knob{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#e8f7ff,#7fcff5 55%,#2f8fbf);box-shadow:0 2px 10px #0006}
 .touch-stick-zone.active .touch-stick{opacity:.95}
+/* Loading progress on the landing screen. */
+.loading{width:min(340px,80vw);margin:0 0 18px}
+.loading-row{display:flex;align-items:center;gap:10px;font-size:10px;letter-spacing:2.2px;font-weight:600;color:#e7be97;text-transform:uppercase}
+.loading-row b{margin-left:auto;font-weight:600;color:#f4efe2;letter-spacing:1px}
+.loading-mark{display:inline-block;font-size:15px;color:#ecc39b;animation:loading-spin 2.4s linear infinite}
+.loading-bar{position:relative;height:4px;margin:10px 0 8px;background:#ffffff1f;border-radius:2px;overflow:hidden}
+.loading-bar i{position:absolute;inset:0;transform-origin:left;background:linear-gradient(90deg,#e9bd92,#4fc3ff);transition:transform .25s ease-out}
+.loading-bar.building i{background:linear-gradient(90deg,#e9bd92 0%,#4fc3ff 40%,#e8f7ff 50%,#4fc3ff 60%,#e9bd92 100%);background-size:200% 100%;animation:loading-shimmer 1.2s linear infinite}
+.loading small{font-size:11px;color:#b9c7c6;letter-spacing:.3px}
+.primary.ready{animation:ready-in .6s cubic-bezier(.2,.7,.2,1) both}
+@keyframes loading-spin{to{transform:rotate(360deg)}}
+@keyframes loading-shimmer{from{background-position:200% 0}to{background-position:0 0}}
+@keyframes ready-in{from{transform:translateY(6px);box-shadow:0 0 0 0 #e9bd9200}50%{box-shadow:0 0 0 8px #e9bd9233}to{transform:none;box-shadow:0 0 0 14px #e9bd9200}}
+@media(prefers-reduced-motion:reduce){.loading-mark,.loading-bar.building i,.primary.ready{animation:none}}
+.loading.done .loading-mark{animation:none}.loading.done .loading-bar i{background:#e9bd92;opacity:.7}

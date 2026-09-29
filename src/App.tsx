@@ -1,4 +1,4 @@
-import { Component, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { Component, Suspense, useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Physics } from '@react-three/rapier'
@@ -8,6 +8,7 @@ import { siteSlots } from './lab/layout'
 import type { Place } from './world-data'
 import type { Controls, Travel, Vec3 } from './World'
 import type { Arrival } from './ArrivalFx'
+import { loadingStore } from './world-assets'
 import './App.css'
 import { isEncounterActive, advanceEncounter, barracksSteps, finaleSteps, gardenSteps, gateSteps } from './encounter-state'
 import type { EncounterPhase } from './encounter-state'
@@ -85,6 +86,22 @@ function TouchStick({ controls }: { controls: React.RefObject<Controls> }) {
     onPointerUp={e => { if (active.current?.id === e.pointerId) release() }}
     onPointerCancel={e => { if (active.current?.id === e.pointerId) release() }}>
     <div ref={base} className="touch-stick"><div ref={knob} className="touch-knob" /></div>
+  </div>
+}
+
+/** Loading progress on the landing screen: bytes while the world downloads, then the build step. */
+function LoadingStatus({ ready }: { ready: boolean }) {
+  const s = useSyncExternalStore(loadingStore.subscribe, loadingStore.get)
+  const mbTotal = (s.total / 1048576).toFixed(1)
+  // Once ready it stays as a quiet line, so the heading above does not jump.
+  if (ready) return <div className="loading done" role="status"><div className="loading-row"><span className="loading-mark" aria-hidden="true">✦</span><span>The world is ready</span></div><div className="loading-bar"><i /></div><small>{mbTotal} MB loaded</small></div>
+  const building = s.phase === 'build'
+  const pct = Math.round(Math.min(1, s.loaded / s.total) * 100)
+  const mb = (n: number) => (n / 1048576).toFixed(1)
+  return <div className="loading" role="status" aria-live="polite">
+    <div className="loading-row"><span className="loading-mark" aria-hidden="true">✦</span><span>{building ? 'Building Seireitei' : 'Downloading the world'}</span><b>{building ? '' : pct + '%'}</b></div>
+    <div className={building ? 'loading-bar building' : 'loading-bar'} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={building ? 100 : pct} aria-label="Loading the world"><i style={{ transform: 'scaleX(' + (building ? 1 : pct / 100) + ')' }} /></div>
+    <small>{building ? 'Raising the gate, the barracks, and everyone in them…' : mb(s.loaded) + ' / ' + mb(s.total) + ' MB'}</small>
   </div>
 }
 
@@ -328,7 +345,8 @@ export default function App() {
     </header>
     {!entered && <section className="entry">
       <div className="entry-copy"><p className="eyebrow"><span /> THE SOUL SOCIETY</p><h1>Every journey<br />begins at<br /><em>the gate.</em></h1><p className="intro">Step into Seireitei. Follow the streets, enter the halls, and find your way to the hill above it all.</p>
-        <button className="primary" disabled={!ready || !!error} onClick={e => { setEntered(true); e.currentTarget.blur() }}>{ready ? 'Enter the world' : 'Preparing the world…'}<span>→</span></button>
+        {!error && <LoadingStatus ready={ready} />}
+        <button className={ready ? 'primary ready' : 'primary'} disabled={!ready || !!error} onClick={e => { setEntered(true); e.currentTarget.blur() }}>{ready ? 'Enter the world' : 'Loading…'}<span>→</span></button>
         <div className="entry-notes"><span>0{places.length} LOCATIONS</span><span>FREE EXPLORATION</span></div>
       </div>
       <div className="entry-bottom"><span>A BLEACH-INSPIRED WORLD</span><span>Headphones optional. Curiosity encouraged.</span></div>

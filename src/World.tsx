@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef } from 'react'
+import { memo, use, useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import { CapsuleCollider, CuboidCollider, RigidBody, TrimeshCollider, useBeforePhysicsStep, useRapier } from '@react-three/rapier'
@@ -22,6 +22,7 @@ import Lab from './Lab'
 import { isEncounterActive } from './encounter-state'
 import type { EncounterPhase } from './encounter-state'
 import Environment from './Environment'
+import { worldAssetUrls } from './world-assets'
 import { makeEnvironmentMaterial } from './environment-materials'
 import { Ichigo } from './finale/characters'
 import type { Figure } from './finale/characters'
@@ -58,8 +59,10 @@ function World({ stage, gateComplete, nextStage, arrival, phase, playing, entere
   // One effect light and one rim light shared by every cinematic (a fixed light count avoids recompiles).
   const cinemaLights = useMemo(() => createCinemaLights(), [])
   const mood = useRef(createFinaleMood())
-  const asset = useGLTF('/assets/seireitei/seireitei-world.glb')
-  const collisionAsset = useGLTF('/assets/seireitei/seireitei-collision.glb')
+  // Downloaded with progress for the loading screen (world-assets.ts), then parsed here.
+  const urls = use(worldAssetUrls())
+  const asset = useGLTF(urls.world)
+  const collisionAsset = useGLTF(urls.collision)
   const prepared = useMemo(() => {
     const materials = new Map<THREE.Material, THREE.Material>()
     const clone = asset.scene.clone(true)
