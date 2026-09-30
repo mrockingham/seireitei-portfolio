@@ -1,7 +1,8 @@
-// The route guide: soft blue light along both edges of the white stone road, floating arrows over
-// it, and signposts at the junctions. The stretch from where you stand to your next fight glows
-// brightest, with pulses running toward it; the rest of the route stays faintly lit. If you have
-// jumped past your next fight on the map, the arrows on that stretch turn around and point back.
+// The route guide, in the manner of an airliner's aisle lighting: rows of small floor lights along
+// both edges of the white stone road, small chevrons lit into the paving, and signposts at the
+// junctions. On the stretch from where you stand to your next fight the lights are brighter and a
+// soft glow runs along them toward it; the rest of the route stays faintly lit. If you have jumped
+// past your next fight on the map, the chevrons on that stretch turn around and point back.
 import { memo, useEffect, useMemo, useRef } from 'react'
 import type { RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
@@ -11,8 +12,11 @@ import { nearestS, routeAt, routeLength, stopS } from './route/route'
 import { buildSignposts } from './route/signs'
 
 const HALF_WIDTH = 1.45
-const ARROW_EVERY = 8.5
-const color = '#4fc3ff'
+const ARROW_EVERY = 11
+const color = '#5cc8ff'
+/** The glow that runs along the lights: speed (m/s) and spacing (m) — the chevrons follow the same wave. */
+const CHASE_SPEED = 5, CHASE_GAP = 18
+const chaseAt = (s: number, t: number, dir: number) => { const x = (s - dir * t * CHASE_SPEED) / CHASE_GAP; return (x - Math.floor(x)) ** 10 }
 
 const edgeVertex = `
 attribute float aS; attribute float aV;
@@ -30,12 +34,16 @@ varying float vS; varying float vV; varying float vFade;
 void main(){
   float lo = min(uFrom, uTo), hi = max(uFrom, uTo);
   float onStretch = smoothstep(lo - 6.0, lo - 1.0, vS) * (1.0 - smoothstep(hi, hi + 4.0, vS));
-  float pulse = pow(fract((vS - uDir * uTime * 7.0) / 14.0), 6.0);
   float across = 1.0 - abs(vV * 2.0 - 1.0);
-  // Solid, not additive: glow on pale stone in daylight has to be paint-bright to read.
-  float strength = mix(.32 + .15 * uAll, .95, onStretch);
-  vec3 col = uColor * (1.0 + .8 * pulse * onStretch) + vec3(.3, .35, .4) * pulse * onStretch;
-  gl_FragColor = vec4(col, strength * smoothstep(0.0, .35, across) * vFade);
+  // A dark track in the paving (it gives the lights contrast in daylight), with a light every 0.9 m.
+  float cell = fract(vS / .9);
+  float light = smoothstep(0.0, .03, cell) * (1.0 - smoothstep(.24, .28, cell)) * smoothstep(.1, .45, across);
+  float chase = pow(fract((vS - uDir * uTime * 5.0) / 18.0), 10.0);
+  float strength = mix(.3 + .12 * uAll, .8 + .2 * chase, onStretch);
+  vec3 lit = mix(uColor, vec3(.92, .98, 1.0), .65 * chase * onStretch);
+  vec3 col = mix(vec3(.13, .17, .2), lit, light);
+  float alpha = mix(.4 * smoothstep(0.0, .2, across), strength, light);
+  gl_FragColor = vec4(col, alpha * vFade);
 }`
 
 /** A flat light strip along one edge of the route, with arc length (aS) per vertex. */
@@ -50,7 +58,7 @@ function edgeGeometry(side: number) {
     routeAt(x - .5, prev, prev.clone()); routeAt(x + .5, next, next.clone())
     n.subVectors(next, prev).setY(0).normalize().cross(up).multiplyScalar(side)
     const lift = kind === 'stairs' ? .22 : kind === 'indoor' ? -100 : .035
-    for (const [w, vv] of [[HALF_WIDTH - .06, 0], [HALF_WIDTH + .06, 1]]) {
+    for (const [w, vv] of [[HALF_WIDTH - .05, 0], [HALF_WIDTH + .05, 1]]) {
       const q = p.clone().addScaledVector(n, w)
       pos.push(q.x, q.y + lift, q.z); s.push(x); v.push(vv)
     }
@@ -100,6 +108,7 @@ function RouteGuide({ nextStage, visible, playerPosition }: { nextStage: number;
       vertexShader: 'varying float vA; varying vec2 vP; void main(){ vA = instanceColor.r; vP = position.xz; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0); }',
       fragmentShader: 'uniform vec3 uColor; varying float vA; varying vec2 vP; void main(){ vec3 c = mix(uColor, vec3(.85, .96, 1.0), .35 * (1.0 - smoothstep(0.0, .3, abs(vP.x)))); gl_FragColor = vec4(c * (1.0 + .4 * vA), min(1.0, vA)); }',
       uniforms: { uColor: { value: new THREE.Color(color) } }, transparent: true, depthWrite: false, toneMapped: false, side: THREE.DoubleSide,
+      polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
     })
     const mesh = new THREE.InstancedMesh(chevronGeometry(), mat, arrowCount)
     mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(arrowCount * 3), 3)
@@ -149,14 +158,12 @@ function RouteGuide({ nextStage, visible, playerPosition }: { nextStage: number;
       const inStretch = !done && s > lo - 4 && s < hi + 2
       const point = inStretch ? dir : 1
       const dist = tmpP.distanceTo(state.camera.position)
-      // Bright on the stretch ahead, faint elsewhere; they fade out far away and when you walk through them.
-      const bright = (inStretch ? 1 : done ? .45 : .3) * (1 - THREE.MathUtils.smoothstep(dist, 40, 70)) * THREE.MathUtils.smoothstep(tmpP.distanceTo(player), 1.2, 3.5)
-      tmpP.y += (kind === 'stairs' ? 1.5 : 1.25) + Math.sin(t * 2.2 + s * .4) * .1
-      // Tipped up by ~30° so the follow camera behind sees the arrow's face, not its edge.
-      e.set(-Math.asin(THREE.MathUtils.clamp(tmpD.y, -1, 1)) * point - .55, Math.atan2(tmpD.x * point, tmpD.z * point), 0)
+      // Lit into the paving: brighter on the stretch ahead (and as the running glow passes), faint elsewhere.
+      const bright = (inStretch ? .65 + .35 * chaseAt(s, t, dir) : done ? .3 : .22) * (1 - THREE.MathUtils.smoothstep(dist, 40, 70))
+      tmpP.y += kind === 'stairs' ? .25 : .045
+      e.set(-Math.asin(THREE.MathUtils.clamp(tmpD.y, -1, 1)) * point, Math.atan2(tmpD.x * point, tmpD.z * point), 0)
       q.setFromEuler(e)
-      const pop = (inStretch ? 1 + .12 * Math.max(0, Math.sin(t * 4 - s * .35)) : .85) * 1.2
-      m4.compose(tmpP, q, scale.setScalar(pop))
+      m4.compose(tmpP, q, scale.setScalar(.85))
       arrows.mesh.setMatrixAt(n, m4)
       arrows.mesh.setColorAt(n, c.setRGB(bright, bright, bright))
       n++

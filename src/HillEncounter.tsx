@@ -20,6 +20,7 @@ import { createCameraPose, evaluateCamera } from './finale/camera'
 import { getEnvMap } from './finale/materials'
 import { findFlatMarker } from './finale/scene-utils'
 import type { CinemaLights } from './finale/scene-utils'
+import { worldWarmup } from './world-assets'
 
 type Props = {
   phase: EncounterPhase
@@ -251,7 +252,8 @@ function HillEncounter({ phase, clock, mood, playerPosition, onPhase, lights }: 
     // then render once off-screen near the hill so shadow variants compile before the fight
     // rather than stalling mid-cinematic.
     const wu = d.warm
-    if (!wu.compiled || (!wu.shadows && nearHill)) {
+    // The world's own warm-up (World.tsx) compiles everything first; this pass then finds it cached.
+    if (worldWarmup.done && (!wu.compiled || (!wu.shadows && nearHill))) {
       const hidden: THREE.Object3D[] = []
       scene.traverse(o => { if (!o.visible) { hidden.push(o); o.visible = true } })
       if (!wu.compiled) { gl.compile(scene, camera); wu.compiled = true }

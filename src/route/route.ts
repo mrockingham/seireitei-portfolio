@@ -1,6 +1,6 @@
 // The journey route as a polyline along the white stone road, from the world manifest's ROUTE
 // markers: gate → east along the plaza road → through the barracks → out the rear doors → west
-// past the Eleventh Division yard → south and west along the stream → over the bridge into the
+// past the Eleventh Division yard → south, and around the house to the bridge → over it into the
 // Kuchiki compound → through the receiving hall → up the switchback stairs → Sōkyoku Hill.
 // The route guide lights its edges and floats arrows along it; distances are arc lengths (m).
 import * as THREE from 'three'
@@ -18,7 +18,13 @@ export const routeNodes: RouteNode[] = [
   { p: [28, .03, -25], next: 'road' },
   { p: [28, .02, -32], next: 'road' },
   { p: [-3, .02, -32], next: 'road' },
-  { p: [-3, .02, -19], next: 'road' },
+  // Around the house rather than across the stream-side lawn: west to the lane between the houses,
+  // south past the house, west along the paving north of the lab, and north up to the bridge.
+  { p: [-3, .02, -18.9], next: 'road' },
+  { p: [-7.1, .02, -18.9], next: 'road' },
+  { p: [-7.1, .02, -7.2], next: 'road' },
+  { p: [-22.6, .02, -7.2], next: 'road' },
+  { p: [-22.6, .05, -17.4], next: 'road' },
   { p: [-22, .2, -19], next: 'road' },
   { p: [-22, .75, -24], next: 'road' },
   { p: [-22, .23, -28], next: 'road' },

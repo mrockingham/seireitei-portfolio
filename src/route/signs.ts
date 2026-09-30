@@ -18,6 +18,9 @@ export const signposts: Signpost[] = [
   // Where the road turns back south toward the stream: the compound's gate is over the bridge.
   { at: [-.4, 0, -35], boards: [B('S', '03', 'Kuchiki compound · bridge', '朽木家'), B('E', '✦', 'Eleventh Division yard', '十一番隊'), B('E', '02', 'Division barracks', '隊舎')] },
   { at: [.3, 0, -21.6], boards: [B('W', '03', 'Kuchiki compound', '朽木家'), B('N', '02', 'Division barracks', '隊舎')] },
+  // The route goes around the house (the lawn by the stream is not a path).
+  { at: [-4.8, 0, -16.6], boards: [B('S', '03', 'Kuchiki compound', '朽木家'), B('N', '02', 'Division barracks', '隊舎')] },
+  { at: [-24.9, 0, -5.4], boards: [B('N', '03', 'Kuchiki compound · bridge', '朽木家'), B('S', '✦', 'Twelfth Division lab', '技術開発局')] },
   // Beyond the receiving hall, at the foot of the stairs.
   { at: [-25.4, 0, -66.6], boards: [B('E', '04', 'Sōkyoku Hill · stairs', '双殛の丘'), B('W', '✦', 'Captains’ training arena', '修練場'), B('S', '03', 'Kuchiki compound', '朽木家')] },
   { at: [-40.5, 0, -64.5], boards: [B('W', '✦', 'Captains’ training arena', '七番隊 · 九番隊'), B('E', '04', 'Sōkyoku Hill', '双殛の丘')] },

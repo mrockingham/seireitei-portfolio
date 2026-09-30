@@ -8,8 +8,9 @@ import { siteSlots } from './lab/layout'
 import type { Place } from './world-data'
 import type { Controls, Travel, Vec3 } from './World'
 import type { Arrival } from './ArrivalFx'
-import { loadingStore } from './world-assets'
+import { loadProgress, loadingStore } from './world-assets'
 import QuickView from './QuickView'
+import manifest from './world-manifest.json'
 import './App.css'
 import { isEncounterActive, advanceEncounter, barracksSteps, finaleSteps, gardenSteps, gateSteps } from './encounter-state'
 import type { EncounterPhase } from './encounter-state'
@@ -90,19 +91,47 @@ function TouchStick({ controls }: { controls: React.RefObject<Controls> }) {
   </div>
 }
 
-/** Loading progress on the landing screen: bytes while the world downloads, then the build step. */
-function LoadingStatus({ ready }: { ready: boolean }) {
+const triangles = (manifest.stats.visual.triangles / 1000).toFixed(0)
+const loaderText: Record<string, [string, (s: { loaded: number; total: number }) => string]> = {
+  download: ['Downloading the world', s => (s.loaded / 1048576).toFixed(1) + ' of ' + (s.total / 1048576).toFixed(1) + ' MB'],
+  build: ['Unpacking Seireitei', () => 'Assembling ' + triangles + 'k triangles of streets, halls, and hills'],
+  compile: ['Preparing the effects', () => 'Readying the petals, ice, and reishi'],
+  frames: ['Opening the gate', () => 'Almost there'],
+  ready: ['The world is ready', () => 'Step inside'],
+  error: ['Something went wrong', () => 'Try reloading the page'],
+}
+/**
+ * The loader in the middle of the landing screen: a ring that fills as the world downloads, unpacks,
+ * warms up its shaders, and draws its first frames, then fades to reveal the gate behind it.
+ */
+function WorldLoader({ ready }: { ready: boolean }) {
   const s = useSyncExternalStore(loadingStore.subscribe, loadingStore.get)
-  const mbTotal = (s.total / 1048576).toFixed(1)
-  // Once ready it stays as a quiet line, so the heading above does not jump.
-  if (ready) return <div className="loading done" role="status"><div className="loading-row"><span className="loading-mark" aria-hidden="true">✦</span><span>The world is ready</span></div><div className="loading-bar"><i /></div><small>{mbTotal} MB loaded</small></div>
-  const building = s.phase === 'build'
-  const pct = Math.round(Math.min(1, s.loaded / s.total) * 100)
-  const mb = (n: number) => (n / 1048576).toFixed(1)
-  return <div className="loading" role="status" aria-live="polite">
-    <div className="loading-row"><span className="loading-mark" aria-hidden="true">✦</span><span>{building ? 'Building Seireitei' : 'Downloading the world'}</span><b>{building ? '' : pct + '%'}</b></div>
-    <div className={building ? 'loading-bar building' : 'loading-bar'} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={building ? 100 : pct} aria-label="Loading the world"><i style={{ transform: 'scaleX(' + (building ? 1 : pct / 100) + ')' }} /></div>
-    <small>{building ? 'Raising the gate, the barracks, and everyone in them…' : mb(s.loaded) + ' / ' + mb(s.total) + ' MB'}</small>
+  const [now, setNow] = useState(() => performance.now())
+  const [gone, setGone] = useState(false)
+  useEffect(() => {
+    if (ready) { const id = window.setTimeout(() => setGone(true), 1200); return () => clearTimeout(id) }
+    // The later phases are estimated over time, so keep the ring moving between store updates.
+    let raf = 0, last = 0
+    const tick = (t: number) => { if (t - last > 90) { last = t; setNow(t) } raf = requestAnimationFrame(tick) }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [ready])
+  if (gone) return null
+  const p = ready ? 1 : loadProgress(s, now)
+  const [label, detail] = loaderText[ready ? 'ready' : s.phase] ?? loaderText.download
+  const C = 2 * Math.PI * 88
+  return <div className={ready ? 'world-loader done' : 'world-loader'} role="status" aria-live="polite">
+    <div className="loader-ring">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <circle className="loader-track" cx="100" cy="100" r="88" />
+        <circle className="loader-fill" cx="100" cy="100" r="88" strokeDasharray={C} strokeDashoffset={C * (1 - p)} />
+      </svg>
+      <span className="loader-mark" aria-hidden="true">✦</span>
+      <strong>{Math.floor(p * 100)}<small>%</small></strong>
+      {[0, 1, 2].map(i => <span key={i} className={'loader-bf bf' + i} aria-hidden="true"><svg viewBox="-20 -16 40 32">{[1, -1].map(side => <g key={side} transform={'scale(' + side + ' 1)'}><path className="bf-wing" d="M0 0 C -6 -12 -18 -14 -18 -4 C -18 2 -10 4 -4 3 C -10 6 -12 14 -6 12 C -2 10 0 6 0 2 Z" /></g>)}</svg></span>)}
+    </div>
+    <p className="loader-label">{label}</p>
+    <p className="loader-detail">{detail(s)}</p>
   </div>
 }
 
@@ -354,10 +383,10 @@ export default function App() {
       <a className="brand" href="#" onClick={e => { e.preventDefault(); if (entered) setPanel('map') }} aria-label="Seireitei world map"><span className="brand-symbol">✦</span><span>SEIREITEI<small>MICHAEL ROCKINGHAM · PORTFOLIO</small></span></a>
       <div className="top-actions"><span className="edition">WORLD STUDY / 01</span>{!encounterActive && !transit && <button className="quick-open" onClick={openQuick} aria-label="Portfolio at a glance">Portfolio <span>≡</span></button>}{entered && <><button onClick={toggleCamera} aria-label={`Camera: ${cameraMode === 'free' ? 'free look' : 'third-person follow'}. Switch mode`} aria-pressed={cameraMode === 'follow'}>{cameraMode === 'free' ? 'Free look' : 'Follow camera'} <kbd>C</kbd></button><button onClick={() => setPanel('map')}>Map <kbd>M</kbd></button><button onClick={() => setPanel('controls')}>Controls <span>↗</span></button></>}</div>
     </header>
+    {!entered && !error && <WorldLoader ready={ready} />}
     {!entered && <section className="entry">
       <div className="entry-copy"><p className="eyebrow"><span /> THE SOUL SOCIETY</p><h1>Every journey<br />begins at<br /><em>the gate.</em></h1><p className="intro">Step into Seireitei. Follow the streets, enter the halls, and find your way to the hill above it all.</p>
-        {!error && <LoadingStatus ready={ready} />}
-        <button className={ready ? 'primary ready' : 'primary'} disabled={!ready || !!error} onClick={e => { setEntered(true); e.currentTarget.blur() }}>{ready ? 'Enter the world' : 'Loading…'}<span>→</span></button>
+        <button className={ready ? 'primary ready' : 'primary'} disabled={!ready || !!error} onClick={e => { setEntered(true); e.currentTarget.blur() }}>{ready ? 'Enter the world' : 'Loading the world…'}<span>→</span></button>
         <button className="quick-link" onClick={openQuick}>Short on time? See the portfolio at a glance <span>→</span></button>
         <div className="entry-notes"><span>0{places.length} LOCATIONS</span><span>FREE EXPLORATION</span></div>
       </div>

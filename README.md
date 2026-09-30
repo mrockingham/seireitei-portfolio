@@ -2,6 +2,10 @@
 
 Vite + React + TypeScript, React Three Fiber, Drei, and Rapier. Assets come from the prepared Blender v02 environment.
 
+## Loading
+
+The landing screen shows a large ring in the middle of the screen that fills as the world loads, with the stage underneath: *Downloading the world* (measured in megabytes, 70% of the ring), *Unpacking Seireitei*, *Preparing the effects*, and *Opening the gate*. Enter the world unlocks only once the world is really on screen: after the download, every shader is compiled in the background (with the scene held back so no frame stalls on an unfinished shader, and so nothing compiles mid-fight later), and then the first frames are drawn. The ring then turns blue and fades to reveal the gate. Code: `src/world-assets.ts` (download and phases), the warm-up in `src/World.tsx`, and `WorldLoader` in `src/App.tsx`.
+
 ## Run
 
 ```sh
@@ -147,9 +151,9 @@ Development only: `window.__training.freeze(seconds)`, `window.__eleventh.freeze
 
 The white stone road is the route, and it is now marked so you can follow it:
 
-- **Lit edges.** Both edges of the road carry a thin blue light line (reishi blue, about 12 cm wide). The stretch from where you stand to your next fight is bright, with pulses running toward it; the rest of the route stays faintly lit. Once all four fights are done, the whole route glows softly.
-- **Floating arrows.** Slim blue chevrons hover over the road every 8.5 m, pointing the way (up the switchback stairs too). If you jump past your next fight on the map, the arrows on that stretch turn around and point back to it. They fade out in the distance and as you walk through them.
-- **Signposts.** Seven wooden signposts stand at the junctions, with arrow-shaped boards (number or ✦, name in English, a line of Japanese) pointing to the fights and the side stops. The one at the road's corner behind the Eleventh Division yard points south to the Kuchiki compound's bridge. The compound's east wall has no gate, so the road turns back south along the stream before crossing into the garden, and that turn used to be easy to miss.
+- **Aisle lights.** Like the floor lighting in an airliner aisle, both edges of the road carry a thin dark track set with small blue lights every 0.9 m. On the stretch from where you stand to your next fight the lights are brighter and a soft glow runs along them toward it; the rest of the route stays faintly lit. Once all four fights are done, the whole route glows softly.
+- **Floor chevrons.** Small blue chevrons are lit into the paving every 11 m (and on the switchback stairs), brightening as the running glow passes. If you jump past your next fight on the map, the chevrons on that stretch turn around and point back to it. They fade out in the distance.
+- **Signposts.** Nine wooden signposts stand at the junctions, with arrow-shaped boards (number or ✦, name in English, a line of Japanese) pointing to the fights and the side stops. The compound's east wall has no gate, so from the corner behind the Eleventh Division yard the route heads south, then goes around the house (along the lane between the houses, past the house, and west along the paving north of the lab) and turns north straight onto the bridge, rather than cutting across the stream-side lawn; signposts mark each turn.
 - **The lab.** An English plaque (*Research & Development Institute*) now sits above the 技術開発局 one, and a free-standing screen by the door, facing the gate, cycles through the websites with their titles under a *Websites · Step inside to browse* header.
 
 All of this is hidden while a fight plays or while you browse the websites. Code: `src/route/route.ts` (the route polyline, from the world manifest's ROUTE markers), `src/route/signs.ts`, and `src/RouteGuide.tsx`. Development only: `window.__route.next(stage)` previews the guide as if that fight were next; `next()` releases it.

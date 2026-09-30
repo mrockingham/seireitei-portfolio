@@ -22,7 +22,7 @@ import Lab from './Lab'
 import { isEncounterActive } from './encounter-state'
 import type { EncounterPhase } from './encounter-state'
 import Environment from './Environment'
-import { worldAssetUrls } from './world-assets'
+import { setLoadPhase, worldAssetUrls, worldWarmup } from './world-assets'
 import { makeEnvironmentMaterial } from './environment-materials'
 import { Ichigo } from './finale/characters'
 import type { Figure } from './finale/characters'
@@ -97,7 +97,35 @@ function World({ stage, gateComplete, nextStage, arrival, phase, playing, entere
   // Html labels test occlusion against the light collision model rather than every visual triangle.
   const occluders = useMemo(() => [{ current: collision }], [collision])
 
-  useEffect(() => { onReady(); return () => { mixer.stopAllAction() } }, [mixer, onReady])
+  useEffect(() => () => { mixer.stopAllAction() }, [mixer])
+  // Warm-up before the world is shown: compile every shader in the background (hidden things too, so
+  // nothing compiles mid-fight), holding the scene back so no frame blocks on an unfinished shader;
+  // then draw a few real frames (textures and buffers upload) and only then report ready.
+  const { gl, scene, camera } = useThree()
+  const warm = useRef({ framesLeft: -1 })
+  useEffect(() => {
+    let cancelled = false
+    setLoadPhase('compile')
+    const hidden: THREE.Object3D[] = []
+    scene.traverse(o => { if (!o.visible) { hidden.push(o); o.visible = true } })
+    const compiled = gl.compileAsync(scene, camera)
+    hidden.forEach(o => { o.visible = false })
+    // eslint-disable-next-line react/immutability -- the scene is held back until its shaders are ready.
+    scene.visible = false
+    compiled.catch(() => undefined).then(() => {
+      if (cancelled) return
+      scene.visible = true
+      worldWarmup.done = true
+      setLoadPhase('frames')
+      warm.current.framesLeft = 3
+    })
+    return () => { cancelled = true; scene.visible = true }
+  }, [gl, scene, camera])
+  useFrame(() => {
+    const w = warm.current
+    if (w.framesLeft < 0) return
+    if (--w.framesLeft === 0) { w.framesLeft = -1; setLoadPhase('ready'); onReady() }
+  })
   useBeforePhysicsStep(world => {
     if (entered && !openClips.current.has('gate_open')) {
       actions.get('gate_open')?.reset().play(); openClips.current.add('gate_open')
