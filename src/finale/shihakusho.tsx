@@ -3,7 +3,7 @@
 // Used by Rukia, Renji, Tōshirō, the captains watching the barracks fight, and Soi Fon.
 import type { ReactNode } from 'react'
 import type * as THREE from 'three'
-import { box, cyl, sph } from './materials'
+import { box, cloth, cyl, sph } from './materials'
 import type { useBindings } from './figure-kit'
 import { P } from './characters'
 
@@ -30,7 +30,7 @@ export function Shihakusho({ bind, m, slots, arms, haori }: {
     {haori && (['haoriL', 'haoriR'] as const).map((name, side) => {
       const t0 = side === 0 ? gap / 2 : Math.PI, tl = Math.PI - gap / 2
       return <group key={name} ref={bind.part(name)} position={[0, .07, 0]}>
-        <P g={cyl(.212, .34, len, 12, true, t0, tl)} m={haori.outer} p={[0, -len / 2, 0]} s={[1, 1, .84]} />
+        <P g={cloth(.212, .34, len, 10, true, t0, tl)} m={haori.outer} p={[0, -len / 2, 0]} s={[1, 1, .84]} />
       </group>
     })}
     <group ref={bind.joint('spine')} position={[0, .08, 0]}>
@@ -76,9 +76,9 @@ export function Shihakusho({ bind, m, slots, arms, haori }: {
     {(['L', 'R'] as Side[]).map(side => {
       const s = side === 'L' ? 1 : -1
       return <group key={side} ref={bind.joint(`thigh${side}`)} position={[s * .093, -.05, 0]}>
-        <P g={cyl(.098, .128, .44, 8)} m={m.black} p={[0, -.2, 0]} />
+        <P g={cloth(.098, .128, .44)} m={m.black} p={[0, -.2, 0]} />
         <group ref={bind.joint(`knee${side}`)} position={[0, -.42, 0]}>
-          <P g={cyl(.126, .148, .36, 8)} m={m.black} p={[0, -.17, 0]} />
+          <P g={cloth(.126, .148, .36)} m={m.black} p={[0, -.17, 0]} />
           <group ref={bind.joint(`ankle${side}`)} position={[0, -.4, 0]}>
             <P g={box(.082, .062, .19)} m={m.tabi} p={[0, -.01, .045]} />
             <P g={box(.092, .02, .22)} m={m.sandal} p={[0, -.05, .045]} />

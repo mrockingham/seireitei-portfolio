@@ -39,6 +39,7 @@ export default function Environment({ anchor, mood }: {
   mood?: React.RefObject<FinaleMood>
 }) {
   const sun=useRef<THREE.DirectionalLight>(null)
+  const fill=useRef<THREE.DirectionalLight>(null)
   const sky=useRef<THREE.Mesh>(null)
   const hemi=useRef<THREE.HemisphereLight>(null)
   const fog=useRef<THREE.Fog>(null)
@@ -60,9 +61,10 @@ export default function Environment({ anchor, mood }: {
       if(fog.current)fog.current.color.copy(h)
       if(sun.current){
         sun.current.color.copy(base.sun).lerp(cold.sun,m.cold).lerp(pink.sun,m.pink).lerp(gold.sun,m.gold).lerp(dusk.sun,m.dusk)
-        sun.current.intensity=2.65*(1-m.dusk*.5)*(1+m.gold*.08)
+        sun.current.intensity=2.5*(1-m.dusk*.5)*(1+m.gold*.08)
       }
-      if(hemi.current)hemi.current.intensity=1.35*(1-m.dusk*.45)
+      if(fill.current)fill.current.intensity=.65*(1-m.dusk*.8)
+      if(hemi.current)hemi.current.intensity=1.5*(1-m.dusk*.45)
     }
     if(sun.current){
       // One 2048 map follows the player; stable increments reduce shadow shimmer.
@@ -71,6 +73,7 @@ export default function Environment({ anchor, mood }: {
       const z=Math.round(anchor.current.z*16)/16
       target.position.set(x,y,z);target.updateMatrixWorld()
       sun.current.position.set(x+36,y+58,z+24)
+      fill.current?.position.set(x-32,y+18,z+36)
     }
   })
   return <>
@@ -78,13 +81,15 @@ export default function Environment({ anchor, mood }: {
     <mesh ref={sky} renderOrder={-1000} material={skyMaterial} frustumCulled={false}>
       <sphereGeometry args={[290,32,16]} />
     </mesh>
-    <hemisphereLight ref={hemi} args={['#d6eafa','#9b8768',1.35]} />
+    <hemisphereLight ref={hemi} args={['#dcecff','#a49d86',1.5]} />
     <ambientLight intensity={.14} />
     <primitive object={target} />
-    <directionalLight ref={sun} target={target} position={[36,58,24]} intensity={2.65} color="#fff0d8" castShadow
+    <directionalLight ref={sun} target={target} position={[36,58,24]} intensity={2.5} color="#fff0d8" castShadow
       shadow-mapSize={[2048,2048]} shadow-camera-left={-44} shadow-camera-right={44}
       shadow-camera-top={44} shadow-camera-bottom={-44} shadow-camera-near={1} shadow-camera-far={155}
-      shadow-bias={-.00015} shadow-normalBias={.045} />
+      shadow-bias={-.00015} shadow-normalBias={.03} />
+    {/* Broad sky bounce: no second shadow map, and it dims with the Bankai mood. */}
+    <directionalLight ref={fill} target={target} position={[-32,18,36]} intensity={.65} color="#c4ddff" />
     <pointLight position={[28,5,-11]} intensity={48} distance={22} decay={1} color="#ffddb2" />
     <pointLight position={[-22,4,-51]} intensity={32} distance={21} decay={1} color="#ffedcc" />
   </>

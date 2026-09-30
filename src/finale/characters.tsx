@@ -6,7 +6,7 @@ import { memo, useImperativeHandle, useMemo, useRef } from 'react'
 import type { ReactNode, Ref, RefObject } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { bladeGeometry, box, cone, cyl, getEnvMap, sph, torus } from './materials'
+import { bladeGeometry, box, cloth, cone, cyl, getEnvMap, sph, torus } from './materials'
 import { spikes, useBindings, useFigureMaterials } from './figure-kit'
 import type { Figure, V3 } from './figure-kit'
 
@@ -14,7 +14,7 @@ export type { Figure } from './figure-kit'
 
 /** One shadow-casting primitive part of a figure. */
 export function P({ g, m, p, r, s, children }: { g: THREE.BufferGeometry; m: THREE.Material; p?: V3; r?: V3; s?: V3 | number; children?: ReactNode }) {
-  return <mesh geometry={g} material={m} position={p} rotation={r} scale={s} castShadow>{children}</mesh>
+  return <mesh geometry={g} material={m} position={p} rotation={r} scale={s} castShadow receiveShadow>{children}</mesh>
 }
 
 const ichigoSpikes = spikes([[.05, 0, .25], [.45, .55, .24], [.45, -.55, .24], [.55, 1.5, .21], [.55, -1.5, .21], [.8, 0, .24], [.9, .85, .22], [.9, -.85, .22], [1.2, .35, .2], [1.2, -.35, .2], [1.0, 2.1, .17], [1.0, -2.1, .17], [.35, 2.65, .18], [1.35, 1.35, .15], [1.35, -1.35, .15]], .128, [0, .15, -.005])
@@ -84,8 +84,8 @@ function IchigoFigure({ figure }: { figure: Ref<Figure> }) {
       {(['coatL', 'coatR'] as const).map((name, side) => {
         const t0 = side === 0 ? gap / 2 : Math.PI, tl = Math.PI - gap / 2
         return <group key={name} ref={bind.part(name)} position={[0, .06, 0]}>
-          <P g={cyl(.2, .4, .96, 12, true, t0, tl)} m={m.coat} p={[0, -.48, 0]} s={[1, 1, .86]} />
-          <P g={cyl(.195, .39, .95, 12, true, t0, tl)} m={m.lining} p={[0, -.48, 0]} s={[1, 1, .86]} />
+          <P g={cloth(.2, .4, .96, 10, true, t0, tl)} m={m.coat} p={[0, -.48, 0]} s={[1, 1, .86]} />
+          <P g={cloth(.195, .39, .95, 10, true, t0, tl)} m={m.lining} p={[0, -.48, 0]} s={[1, 1, .86]} />
           <group scale={[1, 1, .86]}>{hem(m.coat, -.96, .39, t0, t0 + tl, 7)}</group>
         </group>
       })}
@@ -167,11 +167,11 @@ function IchigoFigure({ figure }: { figure: Ref<Figure> }) {
       {(['L', 'R'] as const).map(side => {
         const s = side === 'L' ? 1 : -1
         return <group key={side} ref={bind.joint(`thigh${side}`)} position={[s * .095, -.05, 0]}>
-          <P g={cyl(.1, .13, .44, 8)} m={m.white} p={[0, -.2, 0]} />
-          <P g={cyl(.1, .13, .44, 8)} m={m.hakama} p={[0, -.2, 0]} />
+          <P g={cloth(.1, .13, .44)} m={m.white} p={[0, -.2, 0]} />
+          <P g={cloth(.1, .13, .44)} m={m.hakama} p={[0, -.2, 0]} />
           <group ref={bind.joint(`knee${side}`)} position={[0, -.42, 0]}>
-            <P g={cyl(.128, .15, .36, 8)} m={m.white} p={[0, -.17, 0]} />
-            <P g={cyl(.128, .15, .36, 8)} m={m.hakama} p={[0, -.17, 0]} />
+            <P g={cloth(.128, .15, .36)} m={m.white} p={[0, -.17, 0]} />
+            <P g={cloth(.128, .15, .36)} m={m.hakama} p={[0, -.17, 0]} />
             <group ref={bind.joint(`ankle${side}`)} position={[0, -.4, 0]}>
               <P g={box(.085, .065, .2)} m={m.tabi} p={[0, -.01, .045]} />
               <P g={box(.095, .02, .23)} m={m.sandal} p={[0, -.05, .045]} />
@@ -210,8 +210,8 @@ function ByakuyaFigure({ figure }: { figure: Ref<Figure> }) {
       {(['haoriL', 'haoriR'] as const).map((name, side) => {
         const t0 = side === 0 ? gap / 2 : Math.PI, tl = Math.PI - gap / 2
         return <group key={name} ref={bind.part(name)} position={[0, .07, 0]}>
-          <P g={cyl(.215, .34, .66, 12, true, t0, tl)} m={m.haori} p={[0, -.33, 0]} s={[1, 1, .84]} />
-          <P g={cyl(.21, .335, .65, 12, true, t0, tl)} m={m.haoriShade} p={[0, -.33, 0]} s={[1, 1, .84]} />
+          <P g={cloth(.215, .34, .66, 10, true, t0, tl)} m={m.haori} p={[0, -.33, 0]} s={[1, 1, .84]} />
+          <P g={cloth(.21, .335, .65, 10, true, t0, tl)} m={m.haoriShade} p={[0, -.33, 0]} s={[1, 1, .84]} />
         </group>
       })}
       <group ref={bind.joint('spine')} position={[0, .08, 0]}>
@@ -275,9 +275,9 @@ function ByakuyaFigure({ figure }: { figure: Ref<Figure> }) {
       {(['L', 'R'] as const).map(side => {
         const s = side === 'L' ? 1 : -1
         return <group key={side} ref={bind.joint(`thigh${side}`)} position={[s * .097, -.05, 0]}>
-          <P g={cyl(.1, .13, .45, 8)} m={m.black} p={[0, -.2, 0]} />
+          <P g={cloth(.1, .13, .45)} m={m.black} p={[0, -.2, 0]} />
           <group ref={bind.joint(`knee${side}`)} position={[0, -.44, 0]}>
-            <P g={cyl(.128, .152, .38, 8)} m={m.black} p={[0, -.18, 0]} />
+            <P g={cloth(.128, .152, .38)} m={m.black} p={[0, -.18, 0]} />
             <group ref={bind.joint(`ankle${side}`)} position={[0, -.41, 0]}>
               <P g={box(.085, .065, .2)} m={m.tabi} p={[0, -.01, .045]} />
               <P g={box(.095, .02, .23)} m={m.sandal} p={[0, -.05, .045]} />

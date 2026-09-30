@@ -10,6 +10,7 @@ const shots: Record<string, { eye: Vec3; target: Vec3; feet: Vec3 }> = {
   street: { eye: [10, 2.7, 6], target: [28, 4.2, -3], feet: [15, .2, 5] },
   hall: { eye: [28, 2.8, -2.5], target: [27, 3.5, -18], feet: [28, .7, -5] },
   garden: { eye: [-29, 3.4, -18], target: [-21, 2.2, -35], feet: [-22, .4, -20] },
+  portrait: { eye: [-12, 23.45, -87.3], target: [-14, 22.95, -91], feet: [-22, 22.2, -79] },
   hill: { eye: [-25, 24.2, -80], target: [8, 25, -93], feet: [-22, 22.2, -79] },
 }
 function StudyCamera({ shot }: { shot: typeof shots[string] }) {

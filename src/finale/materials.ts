@@ -37,6 +37,28 @@ export function cachedGeometry(key: string, make: () => THREE.BufferGeometry) {
 }
 export const cyl = (rt: number, rb: number, h: number, seg = 10, open = false, t0 = 0, tl = Math.PI * 2) =>
   cachedGeometry(`cyl:${rt}:${rb}:${h}:${seg}:${open}:${t0}:${tl}`, () => new THREE.CylinderGeometry(rt, rb, h, seg, 1, open, t0, tl))
+
+/** Shallow tailored folds, shared by every rig.
+ * The waist stays fitted; pleats open toward the hem without adding meshes or draw calls.
+ */
+export function cloth(rt: number, rb: number, h: number, folds = 7, open = false, t0 = 0, tl = Math.PI * 2) {
+  return cachedGeometry(`cloth:${rt}:${rb}:${h}:${folds}:${open}:${t0}:${tl}`, () => {
+    const g = new THREE.CylinderGeometry(rt, rb, h, Math.max(12, Math.ceil(folds * 6 * tl / (Math.PI * 2))), 4, open, t0, tl)
+    const p = g.attributes.position
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), z = p.getZ(i), drop = .5 - p.getY(i) / h
+      const angle = Math.atan2(x, z)
+      const trough = .5 + .5 * Math.cos(angle * folds)
+      // Open coats fold outward to keep their existing clearance over the trousers.
+      const fold = 1 + (open ? .07 * (1 - trough) : -.12 * trough) * (.15 + .85 * drop * drop)
+      p.setXYZ(i, x * fold, p.getY(i), z * fold)
+    }
+    g.computeVertexNormals()
+    g.computeBoundingBox()
+    g.computeBoundingSphere()
+    return g
+  })
+}
 export const sph = (r: number, ws = 12, hs = 10, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI) =>
   cachedGeometry(`sph:${r}:${ws}:${hs}:${phiStart}:${phiLength}:${thetaStart}:${thetaLength}`, () => new THREE.SphereGeometry(r, ws, hs, phiStart, phiLength, thetaStart, thetaLength))
 export const box = (w: number, h: number, d: number) => cachedGeometry(`box:${w}:${h}:${d}`, () => new THREE.BoxGeometry(w, h, d))
